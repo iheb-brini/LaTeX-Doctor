@@ -23,7 +23,9 @@ Examples:
 
 from pathlib import Path
 from typing import Optional, Iterable, Dict
-from Modules.Acronym.core import generate_acronyms
+from Modules.Acronym import generate_acronyms
+from Modules.Titles import generate_titles
+
 from logging import basicConfig, getLogger, Logger
 
 
@@ -46,13 +48,29 @@ def main(argv: Optional[Iterable[str]] = None) -> int:
     parser.add_argument("--json", action="store_true", help="Print JSON (list or dict)")
     parser.add_argument("--export", help="Export acronyms (plain list) to a file")
     parser.add_argument("--export-latex", help="Export LaTeX Acronyms chapter to a file")
+    parser.add_argument("--task", choices=["acronyms", "titles"], default="acronyms",help="Task to perform")
+    parser.add_argument("--title-standard", choices=["Uppercase","Capitalize", "AllCaps"], default="Uppercase", help="Standardize titles")
+    parser.add_argument("--inplace", default=False, action="store_true", help="Modify files in place")
+
     parser.add_argument(
         "--no-definitions",
         action="store_true",
         help="Only extract acronyms in parentheses (ignore definitions)",
     )
     args = parser.parse_args(list(argv) if argv is not None else None)
-    generate_acronyms(logger, args.file, args.folder, args.json, args.export, args.export_latex, args.no_definitions)
+    task = args.task
+    if task == "acronyms":
+        logger.info("Extracting acronyms...")
+        generate_acronyms(logger, args.file, args.folder, args.json, args.export, args.export_latex, args.no_definitions)
+    elif task == "titles":
+        logger.info("Standardizing titles...")
+        generate_titles(
+            logger=logger, 
+            file=args.file, 
+            folder=args.folder, 
+            title_standard=args.title_standard, 
+            inplace=args.inplace
+        )
 
     return 0
 
